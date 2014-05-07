@@ -12,11 +12,15 @@ def ascii_to_bin(char):
 	zerofix = (8 - len(binary)) * '0'
 	return zerofix + binary
 
-def generaError(lista):
+def bin_to_ascii(cadena):
+	caracter= chr(int(cadena, 2))
+	return caracter
+
+def generaError(listaError):
 
 	cambiarEnLista = random.randrange(3)
 	cambiarEnBinario = random.randrange(7)
-	valor = lista[cambiarEnLista]
+	valor = listaError[cambiarEnLista]
 	caracter = list(valor)
 
 	print "posicion del error: ",cambiarEnLista
@@ -29,9 +33,9 @@ def generaError(lista):
 		caracter[cambiarEnBinario] = '1'
 		valor = ''.join(map(str, caracter))
 		
-	lista[cambiarEnLista] = valor
+	listaError[cambiarEnLista] = valor
 
-	return lista
+	return listaError, cambiarEnLista
 
 def autocompletar(cadena):
 	''' Buscamos las posiciones de los datos de paridad '''
@@ -58,10 +62,11 @@ def calcularFila(cadenaAuto, salto, cadenaTemporal=""):
 	# recortamos la cadena para que empiece en ese elemento
 	cadenaAuto = cadenaAuto[salto-1:]
 	# agregamos una varible apoyo para conservar las "coordenadas"
-	n = "N"*(salto-1)
+	n = "-"*(salto-1)
 	cadenaTemporal += n 
  
-	n = "N"*salto
+	n = "-"*salto
+
 	nsalto = salto * 2
 	while len(cadenaAuto) > 0:
 		# tomamos los elementos segun la paridad
@@ -73,101 +78,176 @@ def calcularFila(cadenaAuto, salto, cadenaTemporal=""):
 		
 	# truncamos hasta el largo de la cadena con paridad
 	cadenaTemporal = cadenaTemporal[:len(originalCadenaAuto)]
- 
 	return cadenaTemporal
  
 def obtenerFilas(cadenaAuto):
+
 	filasDeParidad = dict()
- 
+ 		
 	totalFilas = cadenaAuto.count("*")
 	filaActual = 0
 	# hacemos una fila por cada elemento de paridad
 	while totalFilas > filaActual:
 		salto = 2 ** filaActual
 		filasDeParidad[salto] = calcularFila(cadenaAuto, salto) 
+		
 		filaActual += 1
-	return filasDeParidad
- 
-def buscarErrores(filasDeParidad):
-	''' Buscamos las filas que las suma de sus bits sea impar. '''
-	filasErroneas = list()
-	for llave, contenido in filasDeParidad.items():
-		sumatoria = 0
-		for elemento in contenido:
-			for caracter in elemento:
-				if caracter != "*" and caracter != "N":
-					sumatoria += int(caracter)
-		if sumatoria % 2 != 0: 
-			error = True
-			# significa que es impar
-			filasErroneas.append(llave)
+
+	for i in [1,2,4,8]:
+		if filasDeParidad[i].count('1') % 2 == 0:
+			filasDeParidad[i] = filasDeParidad[i].replace("*","0")
 		else:
-			error = False
-	return filasErroneas, error
- 
-def buscamosRelacionErrores(bitsFilasErroneas):
-	columnasRelacionadas = list()
-	for indice, elementosFilas in enumerate(bitsFilasErroneas):
-		centinela = False
-		for bit in elementosFilas:
-			try:
-				# si los numeros se pueden convertir a enteros
-				# significa que las columnas estan relacionadas
-				int(bit)
-				centinela = True
-			except:
-				centinela = False
-				break
-		if centinela:
-			columnasRelacionadas.append(indice)
-	return columnasRelacionadas
- 
-def buscarColumnasRelacionadas(filas, filasErroneas):
-	longitud = len(filas.values()[0])
-	
-	bitsFilasErroneas = list()
-	for i in range(longitud):
-		bits = ""
-		copyFilasErroneas = list(filasErroneas)
-		while len(copyFilasErroneas) > 0:
-			# asignamos la fila a buscar
-			filaObjetivo = copyFilasErroneas.pop(0)
-			for j in filasErroneas:
-				if j == filaObjetivo:
-					# ... y guardamos su elemento
-					bits += filas[j][i]
-		bitsFilasErroneas.append(bits)
- 
-	''' Ahora que tenemos los bits que se forman con cada fila erronea,
-	tenemos que encontrar cuales columanas estan relacionadas.
-	'''
-	columnasRelacionadas = buscamosRelacionErrores(bitsFilasErroneas)
-	return columnasRelacionadas
- 
-def quitarEspaciosParidad(cadenaAuto):
-	return cadenaAuto.replace("*", "")
+			filasDeParidad[i] = filasDeParidad[i].replace("*","1")
 
+	return filasDeParidad
 
-import random
+def oFilas(cadenaAuto):
+
+	filasDeParidad = dict()
+ 		
+	totalFilas = cadenaAuto.count("*")
+	filaActual = 0
+	# hacemos una fila por cada elemento de paridad
+	while totalFilas > filaActual:
+		salto = 2 ** filaActual
+		filasDeParidad[salto] = calcularFila(cadenaAuto, salto) 
+		
+		filaActual += 1
+
+	return filasDeParidad
+
+def obtenerFilasErr(cadenaAuto,paridades1):
+	x=0
+	filasDeParidad = dict()
+ 		
+	totalFilas = cadenaAuto.count("*")
+	filaActual = 0
+	# hacemos una fila por cada elemento de paridad
+	while totalFilas > filaActual:
+		salto = 2 ** filaActual
+		filasDeParidad[salto] = calcularFila(cadenaAuto, salto) 
+		
+		filaActual += 1
+
+	for i in [1,2,4,8]:
+		if filasDeParidad[i].count('1') == paridades1[x] :
+			if filasDeParidad[i].count('1') % 2 == 0:
+				filasDeParidad[i] = filasDeParidad[i].replace("*","0")
+			else:
+				filasDeParidad[i] = filasDeParidad[i].replace("*","1")
+		else:
+			if filasDeParidad[i].count('1') % 2 != 0:
+				filasDeParidad[i] = filasDeParidad[i].replace("*","0")
+			else:
+				filasDeParidad[i] = filasDeParidad[i].replace("*","1")
+
+		x=x+1
+
+	return filasDeParidad
+
+def detectarError(filas):
+	filasConErrores = []
+	for i in [1,2,4,8]:
+		if filas[i].count('1') % 2 != 0:
+		 	filasConErrores.append(i)
+
+	print "paridades con errores",filasConErrores
+	return filasConErrores
+
+def corregirError(cadenaAuto, errores):
+	cadena = list(cadenaAuto)
+	control = 0
+	for i in errores:
+		control = control + i
+
+	if cadena[control-1] =="1":
+		cadena[control-1] = "0"
+	else:
+		cadena[control-1] = "1"
+
+	cadenaFinal = "".join(cadena)
+
+	return cadenaFinal
+
+import random, sys, copy
 def main():
-	lista = []
-	listaError = []
+	
 	caracter = raw_input('ingrese palabra de 4 caracteres: ')
 	print "-----------------"
 	if len(caracter) == 4:
+
+		print "GENERAR ERROR"
 		caracter = list(caracter)
 
+		lista = []
+		paridades1 = []
+		cadenaCorregida = []
+		
 		for i in caracter:
 			lista.append(ascii_to_bin(i))
 		
 		print "Cadena de entrada binario: 	", lista
 
-		listaError = generaError(lista)
+		listaError= copy.copy(lista)
 
-		print "Cadena de entrada con error 	",listaError
-		
+		(listError, posError) = generaError(listaError)
+		print "Cadena de entrada con errores: 	",listaError
+
 		print "-----------------"
+
+		print "PALABRA CON ERROR"
 		
+		for i in listaError:
+			carac = bin_to_ascii(i)
+			sys.stdout.write(carac)
+
+		print "\n-----------------"
+		i = 0
+		for x in lista:
+			if x == listaError[i]:
+				#meter a lista cadena a analizar
+				cadenaAuto = autocompletar(x)
+				print "-----------------"
+				print "Cadena a analizar: 	", cadenaAuto
+				filas = obtenerFilas(cadenaAuto)
+				print "paridad 1 		", filas[1]
+			 	print "paridad 2 		", filas[2]
+			 	print "paridad 4 		", filas[4]
+			 	print "paridad 8 		", filas[8]
+				
+				cadenaCorregida.append(cadenaAuto)
+				
+			else:
+				cadenaAuto1 = autocompletar(x)
+				cadenaAuto = autocompletar(listaError[i])
+				print "-----------------"
+				print "Cadena a analizar: 	",cadenaAuto
+				filas1 = oFilas(cadenaAuto1)
+
+				for x in [1,2,4,8]:
+					paridades1.append(filas1[x].count("1"))
+
+				filas = obtenerFilasErr(cadenaAuto,paridades1)
+				print "paridad 1 		", filas[1]
+			 	print "paridad 2 		", filas[2]
+			 	print "paridad 4 		", filas[4]
+			 	print "paridad 8 		", filas[8]
+				
+				errores = detectarError(filas)
+
+				cadenaNueva = corregirError(cadenaAuto,errores)
+
+				cadenaCorregida.append(cadenaNueva)
+
+			i = i+1
+		print "-----------------"
+		print "CADENA CORREGIDA"
+		for x in cadenaCorregida:
+			x=x.replace("*","")
+			carac = bin_to_ascii(x)
+			sys.stdout.write(carac)
+			
+		print "\n-----------------"
 	else:
 		print "solo palabra de 4 caracteres"	
  
