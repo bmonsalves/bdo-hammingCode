@@ -205,7 +205,7 @@ def main():
 		i = 0
 		for x in lista:
 			if x == listaError[i]:
-				#meter a lista cadena a analizar
+
 				cadenaAuto = autocompletar(x)
 				print "-----------------"
 				print "Cadena a analizar: 	", cadenaAuto
@@ -235,6 +235,7 @@ def main():
 				
 				errores = detectarError(filas)
 
+				#busca el bit de la cadena con error
 				cadenaNueva = corregirError(cadenaAuto,errores)
 
 				cadenaCorregida.append(cadenaNueva)
