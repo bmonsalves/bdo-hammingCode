@@ -151,7 +151,7 @@ def detectarError(filas):
 		if filas[i].count('1') % 2 != 0:
 		 	filasConErrores.append(i)
 
-	print "paridades con errores",filasConErrores
+	print "\nparidades con errores",filasConErrores
 	return filasConErrores
 
 def corregirError(cadenaAuto, errores):
@@ -166,6 +166,9 @@ def corregirError(cadenaAuto, errores):
 		cadena[control-1] = "1"
 
 	cadenaFinal = "".join(cadena)
+
+
+	print "bit que presenta el error (0 a 11): ",control-1
 
 	return cadenaFinal
 
@@ -239,6 +242,8 @@ def main():
 				cadenaNueva = corregirError(cadenaAuto,errores)
 
 				cadenaCorregida.append(cadenaNueva)
+
+				print "cadena corregida: ",cadenaNueva
 
 			i = i+1
 		print "-----------------"
